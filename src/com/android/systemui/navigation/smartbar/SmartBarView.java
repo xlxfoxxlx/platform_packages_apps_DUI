@@ -119,6 +119,10 @@ public class SmartBarView extends BaseNavigationBar {
     private int mImeHintMode;
     private int mButtonAnimationStyle;
 
+    // reload drawables on reorient as CMTE may not have
+    // fully resolved icons yet
+    private boolean mFirstRun = true;
+
     public SmartBarView(Context context) {
         super(context);
         mBarTransitions = new SmartBarTransitions(this);
@@ -411,6 +415,10 @@ public class SmartBarView extends BaseNavigationBar {
         mContextLeft = mCurrentView.findViewWithTag(Res.Softkey.CONTEXT_VIEW_LEFT);
         mContextRight = mCurrentView.findViewWithTag(Res.Softkey.CONTEXT_VIEW_RIGHT);
         mCurrentContext = mHasLeftContext ? mContextLeft : mContextRight;
+        if (mFirstRun) {
+            mFirstRun = false;
+            updateCurrentIcons();
+        }
         setDisabledFlags(mDisabledFlags, true);
         setScreenPinningVisibility();
         setMenuVisibility(mShowMenu, true);
