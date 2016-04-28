@@ -52,13 +52,14 @@ public class PulseRenderer implements Renderer {
     private int mPathEffect1;
     private int mPathEffect2;
     private int mCustomDimen;
+    private int mNumDivision;
     private Paint mPaint;
     private StreamValidator mValidator;
 
     public PulseRenderer(Context ctx, StreamValidator validator) {
         super();
         mValidator = validator;
-        mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions);
+        getdivions(ctx);
         mDefColor = ctx.getResources().getColor(R.color.config_pulseFillColor);
         mDbFuzzFactor = ctx.getResources().getInteger(R.integer.config_pulseDbFuzzFactor);
         mDbFuzz = ctx.getResources().getInteger(R.integer.config_pulseDbFuzz);
@@ -200,4 +201,37 @@ public class PulseRenderer implements Renderer {
 	mPaint.setStrokeWidth(ctx.getResources().getDimensionPixelSize(R.dimen.config_pulsePathStrokeWidth19));
 	}
     }
+    
+    public void getdivions(Context ctx) {
+	mNumDivision = Settings.System.getIntForUser(
+		ctx.getContentResolver(), Settings.System.PULSE_CUSTOM_DIV, 0,
+		UserHandle.USER_CURRENT);
+	if (mNumDivision == 0) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions);
+	} 
+	else if (mNumDivision == 1) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions1);
+	} 
+	else if (mNumDivision == 2) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions2);
+	}
+	else if (mNumDivision == 3) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions3);
+	}
+	else if (mNumDivision == 4) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions4);
+	}
+	else if (mNumDivision == 5) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions5);
+	}
+	else if (mNumDivision == 6) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions6);
+	}
+	else if (mNumDivision == 7) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions7);
+	}
+	else if (mNumDivision == 8) {
+	mDivisions = ctx.getResources().getInteger(R.integer.config_pulseDivisions8);
+	}  
+      }
 }
