@@ -137,20 +137,20 @@ public class PulseRenderer implements Renderer {
     }
     
     public void getcustomizations(Context ctx) {   
-        mFilledBlock = Settings.System.getIntForUser(
-		ctx.getContentResolver(), Settings.System.PULSE_FILLED_BLOCK_SIZE, 0,
+        mFilledBlock = Settings.Secure.getIntForUser(
+		ctx.getContentResolver(), Settings.Secure.PULSE_FILLED_BLOCK_SIZE, 0,
 		UserHandle.USER_CURRENT);
-	mEmptyBlock = Settings.System.getIntForUser(
-		ctx.getContentResolver(), Settings.System.PULSE_EMPTY_BLOCK_SIZE, 0,
+	mEmptyBlock = Settings.Secure.getIntForUser(
+		ctx.getContentResolver(), Settings.Secure.PULSE_EMPTY_BLOCK_SIZE, 0,
 		UserHandle.USER_CURRENT);
-	mCustomDimen = Settings.System.getIntForUser(
-		ctx.getContentResolver(), Settings.System.PULSE_CUSTOM_DIMEN, 0,
+	mCustomDimen = Settings.Secure.getIntForUser(
+		ctx.getContentResolver(), Settings.Secure.PULSE_CUSTOM_DIMEN, 0,
 		UserHandle.USER_CURRENT);
-	mNumDivision = Settings.System.getIntForUser(
-		ctx.getContentResolver(), Settings.System.PULSE_CUSTOM_DIV, 0,
+	mNumDivision = Settings.Secure.getIntForUser(
+		ctx.getContentResolver(), Settings.Secure.PULSE_CUSTOM_DIV, 0,
 		UserHandle.USER_CURRENT);
-	mFudgeFactor = Settings.System.getIntForUser(
-		ctx.getContentResolver(), Settings.System.PULSE_CUSTOM_FUDGE_FACTOR, 0,
+	mFudgeFactor = Settings.Secure.getIntForUser(
+		ctx.getContentResolver(), Settings.Secure.PULSE_CUSTOM_FUDGE_FACTOR, 0,
 		UserHandle.USER_CURRENT);	
         if (mFilledBlock == 0) {
 	mPathEffect1 = ctx.getResources().getDimensionPixelSize(R.dimen.config_pulsePathEffect_1);
