@@ -64,5 +64,6 @@
     <string name="label_smartbar_icon_color">Color</string>
     <string name="label_smartbar_icon_reset">Reset</string>
     <string name="smartbar_editor_toast_unavailable">Navigation editor unavailable</string>
+    <string name="edit_mode">Edit Mode</string>
 
 </resources>
