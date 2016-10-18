@@ -47,7 +47,7 @@ public class SmartButtonView extends ImageView {
     private static final int LP_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
     // AOSP values feel rather slow, shave off some slack
-    private static int sLongPressTimeout = LP_TIMEOUT - 100;
+    private static int sLongPressTimeout = LP_TIMEOUT + 100;
     private static int sDoubleTapTimeout = DT_TIMEOUT - 100;
 
     // Rebound spring config
