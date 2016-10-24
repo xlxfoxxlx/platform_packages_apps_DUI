@@ -51,8 +51,8 @@ public class SmartButtonView extends ImageView {
     private static int sDoubleTapTimeout = DT_TIMEOUT - 100;
 
     // Rebound spring config
-    private static double TENSION = 130;
-    private static double FRICTION = 11;
+    private static double TENSION = 140;
+    private static double FRICTION = 12;
     public static final int ANIM_STYLE_RIPPLE = 0;
     public static final int ANIM_STYLE_SPRING = 1;
     public static final int ANIM_STYLE_FLIP = 2;
