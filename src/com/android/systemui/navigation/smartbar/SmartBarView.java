@@ -33,8 +33,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.PowerManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -90,6 +88,7 @@ public class SmartBarView extends BaseNavigationBar {
         sUris.add(Settings.Secure.getUriFor("smartbar_ime_hint_mode"));
         sUris.add(Settings.Secure.getUriFor("smartbar_button_animation_style"));
         sUris.add(Settings.Secure.getUriFor(Settings.Secure.NAVBAR_BUTTONS_ALPHA));
+        sUris.add(Settings.System.getUriFor(Settings.System.SMARTBAR_DOUBLETAP_SLEEP));
     }
 
     private SmartObservable mObservable = new SmartObservable() {
@@ -109,6 +108,8 @@ public class SmartBarView extends BaseNavigationBar {
                 updateAnimationStyle();
             } else if (uri.equals(Settings.Secure.getUriFor(Settings.Secure.NAVBAR_BUTTONS_ALPHA))) {
                 updateButtonAlpha();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.SMARTBAR_DOUBLETAP_SLEEP))) {
+                updateNavDoubletapSetting();
             }
         }
     };
@@ -123,6 +124,7 @@ public class SmartBarView extends BaseNavigationBar {
     private ArrayList<String> mCurrentSequence = new ArrayList<String>();
     private View mContextRight, mContextLeft, mCurrentContext;
     private boolean mHasLeftContext;
+    private boolean isNavDoubleTapEnabled;
     private int mImeHintMode;
     private int mButtonAnimationStyle;
     private float mCustomAlpha;
@@ -143,10 +145,7 @@ public class SmartBarView extends BaseNavigationBar {
                 new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-                if (pm != null) {
-                    pm.goToSleep(SystemClock.uptimeMillis());
-                }
+                ActionHandler.performTask(context, ActionHandler.SYSTEMUI_TASK_SCREENOFF);
                 return true;
             }
         });
@@ -154,8 +153,7 @@ public class SmartBarView extends BaseNavigationBar {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.SMARTBAR_DOUBLETAP_SLEEP, 1, UserHandle.USER_CURRENT) == 1) {
+        if (isNavDoubleTapEnabled) {
             mNavDoubleTapToSleep.onTouchEvent(event);
         }
         return super.onTouchEvent(event);
@@ -175,6 +173,7 @@ public class SmartBarView extends BaseNavigationBar {
         recreateLayouts();
         updateImeHintModeSettings();
         updateContextLayoutSettings();
+        updateNavDoubletapSetting();
     }
 
     @Override
@@ -525,6 +524,11 @@ public class SmartBarView extends BaseNavigationBar {
         getHiddenContext().findViewWithTag(Res.Softkey.MENU_BUTTON).setVisibility(INVISIBLE);
         getHiddenContext().findViewWithTag(Res.Softkey.IME_SWITCHER).setVisibility(INVISIBLE);
         setNavigationIconHints(mNavigationIconHints, true);
+    }
+
+    private void updateNavDoubletapSetting() {
+        isNavDoubleTapEnabled = Settings.System.getIntForUser(getContext().getContentResolver(),
+                Settings.System.SMARTBAR_DOUBLETAP_SLEEP, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     void recreateButtonLayout(ArrayList<ButtonConfig> buttonConfigs, boolean landscape,
