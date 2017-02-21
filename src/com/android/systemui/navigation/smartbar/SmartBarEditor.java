@@ -36,7 +36,6 @@ import com.android.internal.utils.du.Config;
 import com.android.internal.utils.du.Config.ButtonConfig;
 import com.android.systemui.navigation.BaseEditor;
 import com.android.systemui.navigation.BaseNavigationBar;
-import com.android.systemui.navigation.OpaLayout;
 import com.android.systemui.navigation.Res;
 import com.android.systemui.navigation.smartbar.SmartBarEditor;
 import com.android.systemui.navigation.smartbar.SmartBarHelper;
@@ -114,7 +113,7 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
     private Point mOriginPoint = new Point();
 
     // buttons to animate when changing positions
-    private ArrayList<OpaLayout> mSquatters = new ArrayList<>();
+    private ArrayList<SmartButtonView> mSquatters = new ArrayList<SmartButtonView>();
 
     // which action are we editing
     private int mTapHasFocusTag;
@@ -237,18 +236,16 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
                 buttonFocus);
         ButtonConfig currentConfig = currentButton.getButtonConfig();
         ButtonConfig otherConfig = otherButton.getButtonConfig();
-        OpaLayout currentOpa = (OpaLayout) currentButton.getParent();
-        OpaLayout otherOpa = (OpaLayout) otherButton.getParent();
         currentConfig.clearCustomIconIconUri();
         otherConfig.clearCustomIconIconUri();
         currentButton.setButtonConfig(currentConfig);
         otherButton.setButtonConfig(otherConfig);
 
         mHost.setButtonDrawable(currentButton);
-        SmartBarHelper.updateButtonScalingAndPadding(currentOpa, isLandscape());
+        SmartBarHelper.updateButtonScalingAndPadding(currentButton, isLandscape());
 
         mHost.setButtonDrawable(otherButton);
-        SmartBarHelper.updateButtonScalingAndPadding(otherOpa, !isLandscape());
+        SmartBarHelper.updateButtonScalingAndPadding(otherButton, !isLandscape());
 
         onCommitChanges();
     }
@@ -261,18 +258,16 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
                 buttonFocus);
         ButtonConfig currentConfig = currentButton.getButtonConfig();
         ButtonConfig otherConfig = otherButton.getButtonConfig();
-        OpaLayout currentOpa = (OpaLayout) currentButton.getParent();
-        OpaLayout otherOpa = (OpaLayout) otherButton.getParent();
         currentConfig.setCustomIconUri(type, packageName, iconName);
         otherConfig.setCustomIconUri(type, packageName, iconName);
         currentButton.setButtonConfig(currentConfig);
         otherButton.setButtonConfig(otherConfig);
 
         mHost.setButtonDrawable(currentButton);
-        SmartBarHelper.updateButtonScalingAndPadding(currentOpa, isLandscape());
+        SmartBarHelper.updateButtonScalingAndPadding(currentButton, isLandscape());
 
         mHost.setButtonDrawable(otherButton);
-        SmartBarHelper.updateButtonScalingAndPadding(otherOpa, !isLandscape());
+        SmartBarHelper.updateButtonScalingAndPadding(otherButton, !isLandscape());
 
         onCommitChanges();
     }
@@ -284,18 +279,16 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
                 buttonFocus);
         ButtonConfig currentConfig = currentButton.getButtonConfig();
         ButtonConfig otherConfig = otherButton.getButtonConfig();
-        OpaLayout currentOpa = (OpaLayout) currentButton.getParent();
-        OpaLayout otherOpa = (OpaLayout) otherButton.getParent();
         currentConfig.setCustomImageUri(Uri.parse(uri));
         otherConfig.setCustomImageUri(Uri.parse(uri));
         currentButton.setButtonConfig(currentConfig);
         otherButton.setButtonConfig(otherConfig);
 
         mHost.setButtonDrawable(currentButton);
-        SmartBarHelper.updateButtonScalingAndPadding(currentOpa, isLandscape());
+        SmartBarHelper.updateButtonScalingAndPadding(currentButton, isLandscape());
 
         mHost.setButtonDrawable(otherButton);
-        SmartBarHelper.updateButtonScalingAndPadding(otherOpa, !isLandscape());
+        SmartBarHelper.updateButtonScalingAndPadding(otherButton, !isLandscape());
 
         onCommitChanges();
     }
@@ -311,17 +304,15 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
         ActionConfig otherAction = new ActionConfig(mContext, action);
         ButtonConfig currentConfig = currentButton.getButtonConfig();
         ButtonConfig otherConfig = otherButton.getButtonConfig();
-        OpaLayout currentOpa = (OpaLayout) currentButton.getParent();
-        OpaLayout otherOpa = (OpaLayout) otherButton.getParent();
         currentConfig.setActionConfig(currentAction, tapFocus);
         otherConfig.setActionConfig(otherAction, tapFocus);
         currentButton.setButtonConfig(currentConfig);
         otherButton.setButtonConfig(otherConfig);
         if (tapFocus == ActionConfig.PRIMARY) { // update icon for single tap only
             mHost.setButtonDrawable(currentButton);
-            SmartBarHelper.updateButtonScalingAndPadding(currentOpa, isLandscape());
+            SmartBarHelper.updateButtonScalingAndPadding(currentButton, isLandscape());
             mHost.setButtonDrawable(otherButton);
-            SmartBarHelper.updateButtonScalingAndPadding(otherOpa, !isLandscape());
+            SmartBarHelper.updateButtonScalingAndPadding(otherButton, !isLandscape());
         }
         onCommitChanges();
     }
@@ -445,8 +436,7 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
             SmartButtonView v = mHost.findCurrentButton(buttonTag);
             if (v != null) {
                 v.setEditMode(isInEditMode);
-                OpaLayout opa = (OpaLayout) v.getParent();
-                opa.setOnTouchListener(isInEditMode ? this : null);
+                v.setOnTouchListener(isInEditMode ? this : null);
             }
         }
     }
@@ -628,8 +618,7 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
         mHost.removeCallbacks(mHidePopupContainer);
         ViewGroup parent = (ViewGroup) editView.getParent();
         mEditContainer.setVisibility(View.VISIBLE);
-        OpaLayout opa = (OpaLayout) editView;
-        mHidden.setTag(opa.getButton().getTag());
+        mHidden.setTag(editView.getTag());
         mHidden.getLayoutParams().width = editView.getWidth();
         mHidden.getLayoutParams().height = editView.getHeight();
         mHidden.setLayoutParams(mHidden.getLayoutParams());
@@ -643,7 +632,7 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
         loadTapMenuMap();
         loadIconMenuMap();
         mEditContainer = new FrameLayout(mHost.getContext());
-        mHidden = new SmartButtonView(mHost.getContext());
+        mHidden = new SmartButtonView(mHost.getContext(), mHost);
         mEditContainer.setOnTouchListener(mEditorWindowTouchListener);
         mHidden.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT));
@@ -781,22 +770,21 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
      */
     private View findInterceptingView(float pos, View v) {
         for (String buttonTag : mHost.getCurrentSequence()) {
-            SmartButtonView otherButton = mHost.findCurrentButton(buttonTag);
-            OpaLayout otherOpa = (OpaLayout)otherButton.getParent();
-            if (otherOpa == v) {
+            SmartButtonView otherView = mHost.findCurrentButton(buttonTag);
+            if (otherView == v) {
                 continue;
             }
-            if (mSquatters.contains(otherOpa)) {
+            if (mSquatters.contains(otherView)) {
                 continue;
             }
 
-            otherOpa.getLocationOnScreen(sLocation);
+            otherView.getLocationOnScreen(sLocation);
             float otherPos = sLocation[mHost.isVertical() ? 1 : 0];
             float otherDimension = mHost.isVertical() ? v.getHeight() : v.getWidth();
 
             if (pos > (otherPos + otherDimension / 4) && pos < (otherPos + otherDimension)) {
-                mSquatters.add(otherOpa);
-                return otherOpa;
+                mSquatters.add(otherView);
+                return otherView;
             }
         }
         return null;
@@ -809,9 +797,8 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
      * @param view - view being dragged
      */
     private void switchId(View replaceView, View dragView) {
-        final OpaLayout squatter = (OpaLayout) replaceView;
-        final OpaLayout dragger = (OpaLayout) dragView;
-
+        final SmartButtonView squatter = (SmartButtonView) replaceView;
+        final SmartButtonView dragger = (SmartButtonView) dragView;
         final boolean vertical = mHost.isVertical();
 
         ViewGroup parent = (ViewGroup) replaceView.getParent();
@@ -819,17 +806,15 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
         replaceView.getLocationOnScreen(sLocation);
         mDragOrigin = sLocation[vertical ? 1 : 0];
 
-        final int targetIndex = mHost.getCurrentSequence().indexOf(squatter.getButton().getTag());
-        final int draggedIndex = mHost.getCurrentSequence().indexOf(dragger.getButton().getTag());
+        final int targetIndex = mHost.getCurrentSequence().indexOf(squatter.getTag());
+        final int draggedIndex = mHost.getCurrentSequence().indexOf(dragger.getTag());
         Collections.swap(mHost.getCurrentSequence(), draggedIndex, targetIndex);
 
         SmartButtonView hidden1 = (SmartButtonView) getHiddenNavButtons().findViewWithTag(
-                squatter.getButton().getTag());
+                squatter.getTag());
         SmartButtonView hidden2 = (SmartButtonView) getHiddenNavButtons().findViewWithTag(
-                dragger.getButton().getTag());
-        OpaLayout hidden1Opa = (OpaLayout) hidden1.getParent();
-        OpaLayout hidden2Opa = (OpaLayout) hidden2.getParent();
-        swapConfigs(hidden1Opa, hidden2Opa);
+                dragger.getTag());
+        swapConfigs(hidden1, hidden2);
 
         Animator anim = getButtonSlideAnimator(squatter, vertical, slideTo);
         anim.setInterpolator(new OvershootInterpolator());
@@ -847,21 +832,21 @@ public class SmartBarEditor extends BaseEditor implements View.OnTouchListener {
         return ObjectAnimator.ofFloat(v, vertical ? View.Y : View.X, slideTo);
     }
 
-    private void swapConfigs(OpaLayout v1, OpaLayout v2) {
-        ButtonConfig config1 = v1.getButton().getButtonConfig();
-        ButtonConfig config2 = v2.getButton().getButtonConfig();
+    private void swapConfigs(SmartButtonView v1, SmartButtonView v2) {
+        ButtonConfig config1 = v1.getButtonConfig();
+        ButtonConfig config2 = v2.getButtonConfig();
         int[] padding1 = SmartBarHelper.getViewPadding(v1);
         int[] padding2 = SmartBarHelper.getViewPadding(v2);
-        ScaleType scale1 = v1.getButton().getScaleType();
-        ScaleType scale2 = v2.getButton().getScaleType();
-        v1.getButton().setButtonConfig(config2);
-        v2.getButton().setButtonConfig(config1);
-        mHost.setButtonDrawable(v1.getButton());
-        mHost.setButtonDrawable(v2.getButton());
+        ScaleType scale1 = v1.getScaleType();
+        ScaleType scale2 = v2.getScaleType();
+        v1.setButtonConfig(config2);
+        v2.setButtonConfig(config1);
+        mHost.setButtonDrawable(v1);
+        mHost.setButtonDrawable(v2);
         SmartBarHelper.applyPaddingToView(v1, padding2);
         SmartBarHelper.applyPaddingToView(v2, padding1);
-        v1.getButton().setScaleType(scale2);
-        v2.getButton().setScaleType(scale1);
+        v1.setScaleType(scale2);
+        v2.setScaleType(scale1);
     }
 
     private ViewGroup getHiddenNavButtons() {

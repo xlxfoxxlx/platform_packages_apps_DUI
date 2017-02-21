@@ -55,7 +55,6 @@ import com.android.internal.utils.du.Config.ActionConfig;
 import com.android.internal.utils.du.Config.ButtonConfig;
 import com.android.systemui.navigation.BaseEditor;
 import com.android.systemui.navigation.BaseNavigationBar;
-import com.android.systemui.navigation.OpaLayout;
 import com.android.systemui.navigation.Res;
 import com.android.systemui.navigation.NavigationController.NavbarOverlayResources;
 import com.android.systemui.navigation.smartbar.SmartBackButtonDrawable;
@@ -377,21 +376,18 @@ public class SmartBarView extends BaseNavigationBar {
         final boolean disableBack = ((disabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0)
                 && ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) == 0);
 
-        OpaLayout opaBack = (OpaLayout)getBackButton().getParent();
-        opaBack.setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
-        OpaLayout opaHome = (OpaLayout)getHomeButton().getParent();
-        opaHome.setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
+        getBackButton().setVisibility(disableBack ? View.INVISIBLE : View.VISIBLE);
+        getHomeButton().setVisibility(disableHome ? View.INVISIBLE : View.VISIBLE);
 
         // if any stock buttons are disabled, it's likely proper
         // to disable custom buttons as well
         for (String buttonTag : mCurrentSequence) {
             SmartButtonView v = findCurrentButton(buttonTag);
-            OpaLayout opa = (OpaLayout) v.getParent();
             if (v != null && v != getBackButton() && v != getHomeButton()) {
                 if (disableHome || disableBack || disableRecent) {
-                    opa.setVisibility(View.INVISIBLE);
+                    v.setVisibility(View.INVISIBLE);
                 } else {
-                    opa.setVisibility(View.VISIBLE);
+                    v.setVisibility(View.VISIBLE);
                 }
             }
         }
@@ -497,7 +493,6 @@ public class SmartBarView extends BaseNavigationBar {
         setNavigationIconHints(mNavigationIconHints, true);
         updateAnimationStyle();
         updateButtonAlpha();
-        setOpaLandscape(mVertical);
     }
 
     @Override
@@ -524,7 +519,6 @@ public class SmartBarView extends BaseNavigationBar {
         setMenuVisibility(mShowMenu, true);
         setNavigationIconHints(mNavigationIconHints, true);
         setButtonAlpha();
-        setOpaLandscape(mVertical);
     }
 
     private void updateContextLayoutSettings() {
@@ -561,14 +555,6 @@ public class SmartBarView extends BaseNavigationBar {
             if (v != null) {
                 v.setAnimationStyle(mScreenPinningEnabled ? SmartButtonView.ANIM_STYLE_RIPPLE : mButtonAnimationStyle);
             }
-        }
-    }
-
-    private void setOpaLandscape(boolean landscape) {
-        for (String buttonTag : mCurrentSequence) {
-            SmartButtonView v = findCurrentButton(buttonTag);
-            OpaLayout opa = (OpaLayout) v.getParent();
-            opa.setLandscape(landscape);
         }
     }
 
@@ -624,13 +610,13 @@ public class SmartBarView extends BaseNavigationBar {
 
         for (int j = 0; j < buttonConfigs.size(); j++) {
             buttonConfig = buttonConfigs.get(j);
-            OpaLayout v = SmartBarHelper.generatePrimaryKey(getContext(), this, landscape, buttonConfig);
+            SmartButtonView v = SmartBarHelper.generatePrimaryKey(getContext(), this, landscape, buttonConfig);
             SmartBarHelper.updateButtonSize(v, dimen, landscape);
             SmartBarHelper.addViewToRoot(navButtonLayout, v, landscape);
 
             // only add once for master sequence holder
             if (updateCurrentButtons) {
-                mCurrentSequence.add((String) v.getButton().getTag());
+                mCurrentSequence.add((String) v.getTag());
             }
 
             // phones get a spacer between each button
@@ -681,14 +667,13 @@ public class SmartBarView extends BaseNavigationBar {
     }
 
     private SmartButtonView generateContextKey(boolean landscape, String tag) {
-        SmartButtonView v = new SmartButtonView(getContext());
+        SmartButtonView v = new SmartButtonView(getContext(), this);
         ButtonConfig buttonConfig = new ButtonConfig(getContext());
         ActionConfig actionConfig = new ActionConfig(getContext());
 
         int extraKeyWidth = getContext().getResources().getDimensionPixelSize(R.dimen.navigation_extra_key_width);
         int extraKeyHeight = getContext().getResources().getDimensionPixelSize(R.dimen.navigation_extra_key_height);
 
-        v.setHost(this);
         v.setLayoutParams(new FrameLayout.LayoutParams(
                 landscape && !BaseNavigationBar.sIsTablet ? LayoutParams.MATCH_PARENT : extraKeyWidth,
                 landscape && !BaseNavigationBar.sIsTablet ? extraKeyHeight : LayoutParams.MATCH_PARENT));
